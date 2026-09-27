@@ -8,8 +8,9 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
-RENDER_BACKEND_URL = os.getenv("RENDER_BACKEND_URL", "https://nepali-movie-recommendation.onrender.com")
 
+# Render Backend URL
+RENDER_BACKEND_URL = os.getenv("RENDER_BACKEND_URL", "https://nepali-movie-recommendation.onrender.com")
 
 TMDB_API_KEY = os.getenv("TMDB_API_KEY")
 OMDB_API_KEY = os.getenv("OMDB_API_KEY")
@@ -47,6 +48,19 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -------------------------------------------------------------
+# Render Backend Health Ping (Wakes up free-tier instance)
+# -------------------------------------------------------------
+@st.cache_data(ttl=600, show_spinner=False)
+def ping_render_backend():
+    """Ping Render backend on load to prevent cold start delays."""
+    try:
+        requests.get(f"{RENDER_BACKEND_URL}", timeout=3)
+    except Exception:
+        pass
+
+ping_render_backend()
+
+# -------------------------------------------------------------
 # TMDB & IMDb API Integration
 # -------------------------------------------------------------
 def clean_title(title):
@@ -54,7 +68,7 @@ def clean_title(title):
     title = re.sub(r'\([^)]*\)', '', title)
     title = re.sub(r'[^a-zA-Z0-9\s]', ' ', title)
     return title.strip()
-x
+
 def get_imdb_rating(imdb_id):
     """Fetch IMDb rating from OMDb API using IMDb ID."""
     if not OMDB_API_KEY or not imdb_id:
@@ -66,6 +80,7 @@ def get_imdb_rating(imdb_id):
     except Exception:
         return "N/A"
 
+@st.cache_data(show_spinner=False)
 def fetch_poster_and_details(movie_title):
     """Fetch poster image, TMDb rating, and IMDb rating."""
     if not TMDB_API_KEY:
@@ -142,17 +157,33 @@ def recommend(movie_title, top_n=5):
         return [], [], [], []
 
 # -------------------------------------------------------------
-# Header & Input Section
+# Header & Live Preview Search Section
 # -------------------------------------------------------------
 st.title("🎬 Nepali Movie Recommender")
+st.caption(f"Backend Server: {RENDER_BACKEND_URL}")
 st.write("Find similar Nepali movies using Content-Based Recommendation.")
 
-selected_movie = st.selectbox(
-    "Choose or type a movie name:",
-    movies['Title'].values
-)
+col_search, col_preview = st.columns([3, 1])
 
-if st.button("Get Recommendations 🚀", type="primary"):
+with col_search:
+    selected_movie = st.selectbox(
+        "Choose or type a movie name:",
+        movies['Title'].values
+    )
+    
+    # Fetch poster dynamically for search selection preview
+    selected_poster, _, _ = fetch_poster_and_details(selected_movie)
+    
+    get_recommendations = st.button("Get Recommendations 🚀", type="primary", use_container_width=True)
+
+with col_preview:
+    st.caption("Selected Movie Preview")
+    st.image(selected_poster, use_container_width=True)
+
+# -------------------------------------------------------------
+# Recommendation Output Section
+# -------------------------------------------------------------
+if get_recommendations:
     with st.spinner('Fetching recommendations, posters, and IMDb ratings...'):
         names, posters, tmdb_r, imdb_r = recommend(selected_movie)
         
