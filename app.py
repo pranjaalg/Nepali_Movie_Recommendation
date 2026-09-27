@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+ RENDER_BACKEND_URL = os.getenv("RENDER_BACKEND_URL", "https://nepali-movie-recommendation.onrender.com")
+
 
 TMDB_API_KEY = os.getenv("TMDB_API_KEY")
 OMDB_API_KEY = os.getenv("OMDB_API_KEY")
@@ -52,7 +54,7 @@ def clean_title(title):
     title = re.sub(r'\([^)]*\)', '', title)
     title = re.sub(r'[^a-zA-Z0-9\s]', ' ', title)
     return title.strip()
-
+x
 def get_imdb_rating(imdb_id):
     """Fetch IMDb rating from OMDb API using IMDb ID."""
     if not OMDB_API_KEY or not imdb_id:
