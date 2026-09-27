@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
- RENDER_BACKEND_URL = os.getenv("RENDER_BACKEND_URL", "https://nepali-movie-recommendation.onrender.com")
+RENDER_BACKEND_URL = os.getenv("RENDER_BACKEND_URL", "https://nepali-movie-recommendation.onrender.com")
 
 
 TMDB_API_KEY = os.getenv("TMDB_API_KEY")
