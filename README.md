@@ -1,4 +1,4 @@
-Markdown
+
 # 🎬 Nepali Movie Recommendation System
 
 An end-to-end Machine Learning web application designed to recommend Nepali movies based on plot summaries, tags, genres, and metadata using Natural Language Processing (NLP) and Content-Based Filtering techniques. 
